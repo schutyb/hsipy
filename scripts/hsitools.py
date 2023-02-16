@@ -36,10 +36,6 @@ def phasor(image_stack, harmonic=1):
         raise ValueError("Image stack data is not an array")
 
 
-#  Thresholding
-#  todo revisar si va a devolver vectores en x e y con las coordendas o en forma de imagen
-#  todo ya que hay que ver como lo ploteo al phasor usando napari
-
 def histogram_thresholding(dc, g, s, imin, imax=None):
     """
         Use this function to filter the background deleting, those pixels where the intensity value is under ic.
@@ -77,3 +73,29 @@ def histogram_thresholding(dc, g, s, imin, imax=None):
             raise ValueError("Empty g array")
     else:
         raise ValueError("Empty dc array")
+
+
+def imthreshold(im, imin, imax=None):
+    """
+    :param im: image to be thresholded
+    :param imin: left intensity value threshold
+    :param imax: right intensity value threshold. It is None there is no superior cutoff intensity
+    :return: image threshold
+    """
+    if im.any():
+        if isinstance(imin, int):
+            imt1 = np.where(im > imin, im, np.zeros(im.shape))
+            if isinstance(imax, int):
+                imt2 = np.where(im < imax, im, np.zeros(im.shape))
+                imt = imt1 * imt2
+                return imt
+            elif imt1.any():
+                return imt1
+            else:
+                raise ValueError("imax value is not an integer")
+        else:
+            raise ValueError("imin value is not an integer")
+    else:
+        raise ValueError("Empty image array")
+
+
