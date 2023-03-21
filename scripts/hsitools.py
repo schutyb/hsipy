@@ -28,6 +28,7 @@ def phasor(image_stack, harmonic=1):
             md = np.sqrt(g ** 2 + s ** 2)
             ph = np.angle(data[harmonic], deg=True)
             avg = np.mean(image_stack, axis=0, dtype=np.float64)
+            avg = avg / avg.max() * 255
         else:
             raise ValueError("harmonic indices is not integer or slice or harmonic out of range\n harmonic range: [1, "
                              "num of channels - 1]")
@@ -298,6 +299,15 @@ def pseudocolor_image(dc, g, s, center, Ro, ncomp=5):
 
 
 def avg_spectrum(hsi_stack, g, s, ncomp, Ro, center):
+    """
+    :param hsi_stack: hyperspectral imaging stack. Type nd numpy array
+    :param g: G image containing the g coordinates of the phasor. Type nd numpy array
+    :param s: S image containing the s coordinates of the phasor. Type nd numpy array
+    :param ncomp: Amount of components.
+    :param Ro: Radius. Type decimal.
+    :param center: (g, s) Coordinates in the phasor plot to center each component. Type  numpy array
+    :return: Average spectrums corresponding to each component.
+    """
     spect = np.zeros([ncomp, len(hsi_stack)])
     for i in range(ncomp):
         M = ((g - center[i][0]) ** 2 + (s - center[i][1]) ** 2 - Ro ** 2)

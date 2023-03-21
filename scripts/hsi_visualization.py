@@ -6,6 +6,7 @@ import hsitools
 import matplotlib as mpl
 import colorsys
 
+
 # The following two functions define the phasor figure: circle and cluster
 def phasor_circle(ax):
     """
@@ -93,7 +94,8 @@ def interactive1(dc, g, s, Ro, nbit, histeq=True, ncomp=5, filt=False, nfilt=0, 
     x, y = hsitools.histogram_thresholding(dc, g, s, ic)
 
     phasor_circle(ax[1, 0])
-    ax[1, 0].hist2d(x, y, bins=256, cmap="RdYlGn_r", norm=colors.LogNorm(), range=[[-1, 1], [-1, 1]])
+    ax[1, 0].hist2d(x, y, bins=256, cmap="RdYlGn_r", norm=colors.LogNorm(),
+                    range=[[-1, 1], [-1, 1]])
     ax[1, 0].set_title('Phasor')
     plt.sca(ax[1, 0])
     plt.xticks([-1, 0, 1], ['-1', '0', '1'])
@@ -129,16 +131,16 @@ def interactive1(dc, g, s, Ro, nbit, histeq=True, ncomp=5, filt=False, nfilt=0, 
 def interactive2(dc, g, s, nbit, phase, modulation, phint, mdint, histeq=True, filt=False, nfilt=0):
     """
         This function plot the avg image, its histogram, the phasors and the rbg pseudocolor image.
-    To get the phasor the user must pick an intensity cut umbral in the histogram in order to plot the phasor.
-    To get the rgb pseudocolor image you must pick three circle in the phasor plot.
+    To get the phasor the user must pick an intensity cut umbral in the histogram in order to plot
+    the phasor. To get the rgb pseudocolor image you must pick three circle in the phasor plot.
     :param phint:
     :param mdint:
     :param modulation:
     :param phase:
     :param nfilt: amount of times to filt G and S images.
     :param filt: Apply median filter to G and S images, before the dc threshold.
-    :param histeq: equalize histogram used in dc image for a better representation. Its only applies for dc
-        when plotting it.
+    :param histeq: equalize histogram used in dc image for a better representation.
+    Its only applies for dc when plotting it.
     :param nbit: bits oof the image
     :param dc: average intensity image. ndarray
     :param g: image. ndarray. Contains the real coordinate G of the phasor
@@ -147,7 +149,7 @@ def interactive2(dc, g, s, nbit, phase, modulation, phint, mdint, histeq=True, f
     """
     if histeq:
         from skimage.exposure import equalize_adapthist
-        auxdc = equalize_adapthist(dc/dc.max())
+        auxdc = equalize_adapthist(dc / dc.max())
     else:
         auxdc = dc
 
@@ -158,7 +160,7 @@ def interactive2(dc, g, s, nbit, phase, modulation, phint, mdint, histeq=True, f
             s = median(s)
             phase = median(phase)
             modulation = median(modulation)
-    nbit = 2**nbit
+    nbit = 2 ** nbit
 
     # First figure plots dc image and its histogram
     fig1, (ax1, ax2) = plt.subplots(1, 2, figsize=(18, 8))
@@ -175,24 +177,37 @@ def interactive2(dc, g, s, nbit, phase, modulation, phint, mdint, histeq=True, f
     x, y = hsitools.histogram_thresholding(dc, g, s, ic)
 
     # Second figure plots the phasor and the pseudocolor image
-    plt.figure()
-    counts, ybins, xbins, _ = plt.hist2d(x, y, bins=256, cmap="RdYlGn_r", norm=colors.LogNorm(), range=[[-1, 1],
-                                                                                                        [-1, 1]])
+    figphasor = plt.figure(100)
+    counts, yb, xb, _ = plt.hist2d(x, y, bins=256, cmap="RdYlGn_r", norm=colors.LogNorm(),
+                                   range=[[-1, 1], [-1, 1]])
+    plt.close(figphasor)
 
     # creates the figures with phasor contour and pseudocolor image
-    fig2, (ax3, ax4) = plt.subplots(1, 2, figsize=(18, 8))
+    fig2, (ax3, ax4, ax5) = plt.subplots(1, 3, figsize=(18, 8))
     phasor_circle(ax3)
     ax3.set_title('Phasor')
-    ax3.contour(counts.transpose(), extent=[xbins.min(), xbins.max(), ybins.min(), ybins.max()], linewidths=3)
+    ax3.contour(counts.transpose(), extent=[xb.min(), xb.max(), yb.min(), yb.max()],
+                linewidths=2, cmap='gray')
     plt.sca(ax3)
     plt.xticks([-1, 0, 1], ['-1', '0', '1'])
     plt.yticks([-1, 0, 1], ['-1', '0', '1'])
 
-    pseudocolor = hsitools.phase_modulation_image(phase, phint, md=modulation, mdinterval=mdint)
+    pseudocolor = hsitools.phase_modulation_image(phase, phint, md=modulation,
+                                                  mdinterval=mdint)
     ax4.imshow(pseudocolor)
     ax4.axis('off')
+
+    ''' fig2.subplots_adjust(bottom=0.5)
+    cmap = mpl.cm.nipy_spectral
+    norm = mpl.colors.Normalize(vmin=phint[0], vmax=phint[1])
+    cb1 = mpl.colorbar.ColorbarBase(ax5, cmap=cmap, norm=norm, orientation='vertical')'''
+
+    cmap = mpl.cm.nipy_spectral
+    norm = mpl.colors.Normalize(vmin=0, vmax=2)
+    sm = plt.cm.ScalarMappable(cmap=cmap, norm=norm)
+    sm.set_array([])
+    plt.colorbar(sm, ticks=np.linspace(0, 2, 100),
+                 boundaries=np.arange(-0.05, 2.1, .1))
+
     plt.show()
     return fig1, fig2
-
-
-
