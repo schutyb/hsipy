@@ -128,7 +128,7 @@ def interactive1(dc, g, s, Ro, nbit, histeq=True, ncomp=5, filt=False, nfilt=0, 
     return fig
 
 
-def interactive2(dc, g, s, nbit, phase, modulation, phint, mdint, histeq=True, filt=False, nfilt=0):
+def interactive2(dc, g, s, nbit, phase, phint, modulation, mdint, histeq=True, filt=False, nfilt=0):
     """
         This function plot the avg image, its histogram, the phasors and the rbg pseudocolor image.
     To get the phasor the user must pick an intensity cut umbral in the histogram in order to plot
@@ -175,6 +175,9 @@ def interactive2(dc, g, s, nbit, phase, modulation, phint, mdint, histeq=True, f
     ic = plt.ginput(1, timeout=0)
     ic = int(ic[0][0])
     x, y = hsitools.histogram_thresholding(dc, g, s, ic)
+    phase = np.where(dc > ic, phase, np.zeros(phase.shape))
+    if modulation.any():
+        modulation = np.where(dc > ic, modulation, np.zeros(modulation.shape))
 
     # Second figure plots the phasor and the pseudocolor image
     figphasor = plt.figure(100)
@@ -183,7 +186,28 @@ def interactive2(dc, g, s, nbit, phase, modulation, phint, mdint, histeq=True, f
     plt.close(figphasor)
 
     # creates the figures with phasor contour and pseudocolor image
-    fig2, (ax3, ax4, ax5) = plt.subplots(1, 3, figsize=(18, 8))
+    auxph = np.asarray(np.meshgrid(np.arange(0, 360), np.arange(0, 360))[0]).transpose()
+    auxmd = np.asarray(np.meshgrid(np.linspace(0, 1, 360), np.linspace(0, 1, 360))[0])
+    colorbar = hsitools.phase_modulation_image(auxph, np.asarray([0, 360]), md=auxmd,
+                                               mdinterval=np.asarray([0, 1]))
+    pseudocolor = hsitools.phase_modulation_image(phase, phint, md=modulation, mdinterval=mdint)
+
+    widths = [5, 5, 1]
+    heights = [5, 5, 1]
+
+    # Figure
+    fig2 = plt.figure(figsize=(12, 5), constrained_layout=True)
+    gs = fig2.add_gridspec(3, 3, width_ratios=widths,
+                           height_ratios=heights)
+    f3_ax1 = fig2.add_subplot(gs[:, 0])
+    f3_ax1.set_title('1')
+    f3_ax1 = fig2.add_subplot(gs[:, 1])
+    f3_ax1.set_title('2')
+    f3_ax1 = fig2.add_subplot(gs[:, 2])
+    f3_ax1.set_title('3')
+
+    # fig2, (ax3, ax4, ax5) = plt.subplots(1, 3, figsize=(18, 8), gridspec_kw={'width_ratios': [3, 3, 1]})
+    # gridspec_kw={'width_ratios': [3, 1]}
     phasor_circle(ax3)
     ax3.set_title('Phasor')
     ax3.contour(counts.transpose(), extent=[xb.min(), xb.max(), yb.min(), yb.max()],
@@ -192,22 +216,15 @@ def interactive2(dc, g, s, nbit, phase, modulation, phint, mdint, histeq=True, f
     plt.xticks([-1, 0, 1], ['-1', '0', '1'])
     plt.yticks([-1, 0, 1], ['-1', '0', '1'])
 
-    pseudocolor = hsitools.phase_modulation_image(phase, phint, md=modulation,
-                                                  mdinterval=mdint)
+
     ax4.imshow(pseudocolor)
+    ax5.imshow(colorbar)
     ax4.axis('off')
-
-    ''' fig2.subplots_adjust(bottom=0.5)
-    cmap = mpl.cm.nipy_spectral
-    norm = mpl.colors.Normalize(vmin=phint[0], vmax=phint[1])
-    cb1 = mpl.colorbar.ColorbarBase(ax5, cmap=cmap, norm=norm, orientation='vertical')'''
-
-    cmap = mpl.cm.nipy_spectral
-    norm = mpl.colors.Normalize(vmin=0, vmax=2)
-    sm = plt.cm.ScalarMappable(cmap=cmap, norm=norm)
-    sm.set_array([])
-    plt.colorbar(sm, ticks=np.linspace(0, 2, 100),
-                 boundaries=np.arange(-0.05, 2.1, .1))
-
+    plt.sca(ax5)
+    plt.xticks([0, 360], [str(phint[0]), str(phint[1])])
+    plt.yticks([0, 360], [str(mdint[1]), str(mdint[0])])
+    ax5.set_xlabel('Phase [Degrees]')
+    ax5.set_ylabel('Modulation')
     plt.show()
+
     return fig1, fig2

@@ -210,7 +210,7 @@ def tile_stitching(im, m, n, hper=0.05, vper=0.05, bidirectional=False):
         raise ValueError("Empty image array")
 
 
-def phase_modulation_image(ph, phinterval, md=None, mdinterval=None, outlier_cut=True, color_scale=0.95):
+def phase_modulation_image(ph, phinterval, md=None, mdinterval=None, outlier_cut=True, color_scale=0.995):
     """
         Given the modulation and phase it returns the pseudo color image in RGB normalizing the phase and modulation
         intro [0, 1] in order to obtain the RGB
@@ -222,9 +222,9 @@ def phase_modulation_image(ph, phinterval, md=None, mdinterval=None, outlier_cut
     :param mdinterval: array contains the max and min of modulation to normalize the modulation image
     :return: rgb the colored image in RGB space. Format numpy ndarray.
     """
-    if not (len(ph.shape) == 2):
+    if not ph.any():
         raise ValueError("Dimension error in phase matrix or modulation matrix")
-    if md.any():
+    if md is not None:
         if not (ph.shape == md.shape):
             raise ValueError("Phase or Modulation matrix: Dimension not match")
     if not (len(phinterval) == 2):
@@ -272,6 +272,7 @@ def phase_modulation_image(ph, phinterval, md=None, mdinterval=None, outlier_cut
                     elif md[i][j] == mdinterval[1]:
                         hsv[i][j][1] = 1
                 rgb[i][j][:] = colorsys.hsv_to_rgb(hsv[i][j][0], hsv[i][j][1], hsv[i][j][2])
+    # rgb = rgb2bitmap(rgb)
     return rgb
 
 
@@ -319,3 +320,14 @@ def avg_spectrum(hsi_stack, g, s, ncomp, Ro, center):
         aux = aux / aux.max()
         spect[i] = aux
     return spect
+
+
+def rgb2bitmap(rgb):
+    """
+    :param rgb: RGB image, shape (m,n,3)
+    :return: image (m, n)
+    """
+    r = rgb[:, :, 0]
+    g = rgb[:, :, 1]
+    b = rgb[:, :, 2]
+    return (r * 6 / 256) * 36 + (g * 6 / 256) * 6 + (b * 6 / 256)
