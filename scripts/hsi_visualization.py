@@ -193,21 +193,15 @@ def interactive2(dc, g, s, nbit, phase, phint, modulation, mdint, histeq=True, f
     pseudocolor = hsitools.phase_modulation_image(phase, phint, md=modulation, mdinterval=mdint)
 
     widths = [5, 5, 1]
-    heights = [5, 5, 1]
+    heights = [5, 5, 5]
 
     # Figure
     fig2 = plt.figure(figsize=(12, 5), constrained_layout=True)
     gs = fig2.add_gridspec(3, 3, width_ratios=widths,
                            height_ratios=heights)
-    f3_ax1 = fig2.add_subplot(gs[:, 0])
-    f3_ax1.set_title('1')
-    f3_ax1 = fig2.add_subplot(gs[:, 1])
-    f3_ax1.set_title('2')
-    f3_ax1 = fig2.add_subplot(gs[:, 2])
-    f3_ax1.set_title('3')
-
-    # fig2, (ax3, ax4, ax5) = plt.subplots(1, 3, figsize=(18, 8), gridspec_kw={'width_ratios': [3, 3, 1]})
-    # gridspec_kw={'width_ratios': [3, 1]}
+    ax3 = fig2.add_subplot(gs[:, 0])
+    ax4 = fig2.add_subplot(gs[:, 1])
+    ax5 = fig2.add_subplot(gs[:, 2])
     phasor_circle(ax3)
     ax3.set_title('Phasor')
     ax3.contour(counts.transpose(), extent=[xb.min(), xb.max(), yb.min(), yb.max()],
@@ -215,16 +209,13 @@ def interactive2(dc, g, s, nbit, phase, phint, modulation, mdint, histeq=True, f
     plt.sca(ax3)
     plt.xticks([-1, 0, 1], ['-1', '0', '1'])
     plt.yticks([-1, 0, 1], ['-1', '0', '1'])
-
-
     ax4.imshow(pseudocolor)
     ax5.imshow(colorbar)
     ax4.axis('off')
     plt.sca(ax5)
-    plt.xticks([0, 360], [str(phint[0]), str(phint[1])])
-    plt.yticks([0, 360], [str(mdint[1]), str(mdint[0])])
+    plt.xticks([0, 180, 360], [str(phint[0]), str(int((phint[1] + phint[0])/2)), str(phint[1])])
+    plt.yticks([0, 180, 360], [str(mdint[1]), str(round((mdint[1] + mdint[0])/2, 2)), str(mdint[0])])
     ax5.set_xlabel('Phase [Degrees]')
     ax5.set_ylabel('Modulation')
     plt.show()
-
     return fig1, fig2
