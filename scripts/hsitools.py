@@ -26,7 +26,7 @@ def phasor(image_stack, harmonic=1):
             s = data[harmonic].imag
             s /= -dc
             md = np.sqrt(g ** 2 + s ** 2)
-            ph = np.angle(data[harmonic], deg=True)
+            ph = np.angle(data[harmonic], deg=True) + 180
             avg = np.mean(image_stack, axis=0, dtype=np.float64)
             avg = avg / avg.max() * 255
         else:
@@ -324,6 +324,7 @@ def avg_spectrum(hsi_stack, g, s, ncomp, Ro, center):
 
 def rgb2bitmap(rgb):
     """
+        Turn rgb image into 8 bit values.
     :param rgb: RGB image, shape (m,n,3)
     :return: image (m, n)
     """
@@ -331,3 +332,24 @@ def rgb2bitmap(rgb):
     g = rgb[:, :, 1]
     b = rgb[:, :, 2]
     return (r * 6 / 256) * 36 + (g * 6 / 256) * 6 + (b * 6 / 256)
+
+
+def impseudocolor(ph, md):
+    """
+        Creates a hsv color image with phase and modulation images.
+        Set the background to black
+    :param ph: (Numpy array) Image with the phase values
+    :param md: (Numpy array) Image with the modulation values
+    :return: Image hsv with values turn into hsv to be representable on the screen.
+    ''"""
+    hsv = np.zeros([ph.shape[0], ph.shape[1], 3])
+    hsv[:, :, 0] = ph/ph.max()
+    hsv[:, :, 1] = md
+    rgb = np.zeros(hsv.shape)
+    for i in range(hsv.shape[0]):
+        for j in range(hsv.shape[1]):
+            if ph[i][j] + md[i][j] == 0:
+                rgb[i, j] = [0, 0, 0]
+            else:
+                rgb[i, j] = colorsys.hsv_to_rgb(hsv[i][j][0], hsv[i][j][1], 1)
+    return rgb
