@@ -22,7 +22,6 @@ def phasor_circle(ax):
     yn2 = lambda x2: -np.sqrt(0.5 ** 2 - x2 ** 2)
     x3 = np.linspace(start=-1, stop=1, num=30)
     x4 = np.linspace(start=-0.7, stop=0.7, num=30)
-
     ax.plot(x1, list(map(yp1, x1)), color='darkgoldenrod')
     ax.plot(x1, list(map(yn1, x1)), color='darkgoldenrod')
     ax.plot(x2, list(map(yp2, x2)), color='darkgoldenrod')
@@ -31,6 +30,8 @@ def phasor_circle(ax):
     ax.scatter([0] * len(x3), x3, marker='|', color='darkgoldenrod')
     ax.scatter(x4, x4, marker='_', color='darkgoldenrod')
     ax.scatter(x4, -x4, marker='_', color='darkgoldenrod')
+    ax.annotate('0º', (1, 0))
+    ax.annotate('180º', (-1, 0))
     return ax
 
 
@@ -72,7 +73,6 @@ def interactive1(dc, g, s, Ro, nbit, histeq=True, ncomp=5, filt=False, nfilt=0, 
         auxdc = equalize_adapthist(dc / dc.max())
     else:
         auxdc = dc
-
     if filt:
         from skimage.filters import median
         for i in range(nfilt):
@@ -80,38 +80,37 @@ def interactive1(dc, g, s, Ro, nbit, histeq=True, ncomp=5, filt=False, nfilt=0, 
             s = median(s)
     nbit = 2 ** nbit
 
-    fig, ax = plt.subplots(2, 2, figsize=(12, 10))
-    ax[0, 0].imshow(auxdc, cmap='gray')
-    ax[0, 0].axis('off')
-    ax[0, 0].set_title('Average intensity image')
-    ax[0, 1].hist(dc.flatten(), bins=nbit, range=(0, nbit))
-    ax[0, 1].set_yscale("log")
-    ax[0, 1].set_title('Average intensity image histogram')
-    cursor = Cursor(ax[0, 1], horizOn=False, vertOn=True, color='darkgoldenrod')
-
+    fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(18, 5))
+    plt.tight_layout()
+    ax1.imshow(auxdc, cmap='gray')
+    ax1.axis('off')
+    ax1.set_title('Average intensity image')
+    ax2.hist(dc.flatten(), bins=nbit, range=(0, nbit))
+    ax2.set_yscale("log")
+    ax2.set_title('Average intensity image histogram')
+    cursor = Cursor(ax2, horizOn=False, vertOn=True, color='darkgoldenrod')
     ic = plt.ginput(1, timeout=0)
     ic = int(ic[0][0])
     x, y = hsitools.histogram_thresholding(dc, g, s, ic)
-
-    phasor_circle(ax[1, 0])
-    ax[1, 0].hist2d(x, y, bins=256, cmap="RdYlGn_r", norm=colors.LogNorm(),
-                    range=[[-1, 1], [-1, 1]])
-    ax[1, 0].set_title('Phasor')
-    plt.sca(ax[1, 0])
+    phasor_circle(ax3)
+    phasorbar = ax3.hist2d(x, y, bins=256, cmap="RdYlGn_r", norm=colors.LogNorm(),
+                           range=[[-1, 1], [-1, 1]])
+    ax3.set_title('Phasor')
+    plt.sca(ax3)
     plt.xticks([-1, 0, 1], ['-1', '0', '1'])
     plt.yticks([-1, 0, 1], ['-1', '0', '1'])
-
+    fig.colorbar(phasorbar[3], ax=ax3)
     center = plt.ginput(ncomp, timeout=0)  # get the circle centers
-    # create the circles
     ccolor = ['darkviolet', 'blue', 'green', 'yellow', 'red']
     for i in range(ncomp):
         circle = plt.Circle((center[i][0], center[i][1]), Ro, color=ccolor[i], fill=False)
-        ax[1, 0].add_patch(circle)
+        ax3.add_patch(circle)
 
     rgba = hsitools.pseudocolor_image(dc, g, s, center, Ro, ncomp=ncomp)
-    ax[1, 1].imshow(rgba)
-    ax[1, 1].set_title('Pseudocolor image')
-    ax[1, 1].axis('off')
+    fig2, ax4 = plt.subplots(1, 1, figsize=(8, 8))
+    ax4.imshow(rgba)
+    ax4.set_title('Pseudocolor image')
+    ax4.axis('off')
 
     if spectrums:
         spect = hsitools.avg_spectrum(hsi_stack, g, s, ncomp, Ro, center)
@@ -124,7 +123,7 @@ def interactive1(dc, g, s, Ro, nbit, histeq=True, ncomp=5, filt=False, nfilt=0, 
         plt.grid()
         plt.xlabel('Wavelength [nm]')
         plt.ylabel('Normalize intensity')
-        plt.show()
+        plt.title('Average Components Spectrums')
     plt.show()
     return fig
 
@@ -153,7 +152,6 @@ def interactive2(dc, g, s, nbit, phase, phint, modulation, mdint, histeq=True, f
         auxdc = equalize_adapthist(dc / dc.max())
     else:
         auxdc = dc
-
     if filt:
         from skimage.filters import median
         for i in range(nfilt):
@@ -172,36 +170,35 @@ def interactive2(dc, g, s, nbit, phase, phint, modulation, mdint, histeq=True, f
     ax2.set_yscale("log")
     ax2.set_title('Average intensity image histogram')
     cursor = Cursor(ax2, horizOn=False, vertOn=True, color='darkgoldenrod')
-
     ic = plt.ginput(1, timeout=0)
     ic = int(ic[0][0])
     x, y = hsitools.histogram_thresholding(dc, g, s, ic)
-
     phase = np.where(dc > ic, phase, np.zeros(phase.shape))
     if modulation.any():
         modulation = np.where(dc > ic, modulation, np.zeros(modulation.shape))
 
-    # Second figure plots the phasor and the pseudocolor image
-    figphasor = plt.figure(100)
-    counts, yb, xb, _ = plt.hist2d(x, y, bins=256, cmap="RdYlGn_r", norm=colors.LogNorm(),
-                                   range=[[-1, 1], [-1, 1]])
-    plt.close(figphasor)
-
-    # creates the figures with phasor contour and pseudocolor image
-    pseudocolor = hsitools.phase_modulation_image(phase, phint, md=modulation, mdinterval=mdint)
-
-    fig2, (ax3, ax4) = plt.subplots(1, 2, figsize=(18, 8))
-    ax3.set_title('Phasor')
+    # Phasor plot
+    fig2, ax3 = plt.subplots(1, 1, figsize=(8, 6))
     phasor_circle(ax3)
-    ax3.contour(counts.transpose(), extent=[xb.min(), xb.max(), yb.min(), yb.max()],
-                linewidths=1, cmap='gray')
+    ax3.set_title('Phasor Plot')
     plt.sca(ax3)
     plt.xticks([-1, 0, 1], ['-1', '0', '1'])
     plt.yticks([-1, 0, 1], ['-1', '0', '1'])
-    area = 100 * y ** 2
-    cr = x
-    ax3.scatter(x, y, c=cr, s=area, cmap='hsv')
+    aux = plt.hist2d(x, y, bins=256, cmap="RdYlGn_r", norm=colors.LogNorm(),
+                     range=[[-1, 1], [-1, 1]])
+    fig2.colorbar(aux[3], ax=ax3)
+
+    # Pseudocolor ph-md image and colorbar
+    pseudocolor = hsitools.phase_modulation_image(phase, phint, md=modulation, mdinterval=mdint)
+    auxphase = np.asarray(np.meshgrid(np.arange(phint[0], phint[1]), np.arange(phint[0], phint[1])))[0]
+    auxmd = np.asarray(np.meshgrid(np.linspace(mdint[0], mdint[1], abs(phint[1]-phint[0])),
+                                   np.linspace(mdint[0], mdint[1], abs(phint[1]-phint[0]))))[0].transpose()
+    pseudo_colorbar = hsitools.phase_modulation_image(auxphase, phint, md=auxmd, mdinterval=mdint)
+
+    fig3, (ax4, ax5) = plt.subplots(1, 2, figsize=(12, 8))
     ax4.imshow(pseudocolor)
+    ax5.imshow(pseudo_colorbar)
     ax4.axis('off')
+    ax5.axis('off')
     plt.show()
-    return fig1, fig2
+    return fig1, fig2, fig3
