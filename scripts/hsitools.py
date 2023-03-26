@@ -26,7 +26,8 @@ def phasor(image_stack, harmonic=1):
             s = data[harmonic].imag
             s /= -dc
             md = np.sqrt(g ** 2 + s ** 2)
-            ph = np.angle(data[harmonic], deg=True) + 180
+            phaux = np.angle(data[harmonic], deg=True)
+            ph = np.where(phaux < 0, phaux + 360, phaux)
             avg = np.mean(image_stack, axis=0, dtype=np.float64)
             avg = avg / avg.max() * 255
         else:
@@ -210,7 +211,7 @@ def tile_stitching(im, m, n, hper=0.05, vper=0.05, bidirectional=False):
         raise ValueError("Empty image array")
 
 
-def phase_modulation_image(ph, phinterval, md=None, mdinterval=None, outlier_cut=True, color_scale=0.995):
+def phase_modulation_image(ph, phinterval, md=None, mdinterval=None, outlier_cut=True, color_scale=0.95):
     """
         Given the modulation and phase it returns the pseudo color image in RGB normalizing the phase and modulation
         intro [0, 1] in order to obtain the RGB
@@ -343,7 +344,7 @@ def impseudocolor(ph, md):
     :return: Image hsv with values turn into hsv to be representable on the screen.
     ''"""
     hsv = np.zeros([ph.shape[0], ph.shape[1], 3])
-    hsv[:, :, 0] = ph/ph.max()
+    hsv[:, :, 0] = ph / ph.max()
     hsv[:, :, 1] = md
     rgb = np.zeros(hsv.shape)
     for i in range(hsv.shape[0]):
