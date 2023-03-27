@@ -10,11 +10,6 @@ and improve open source software for bioimaging communities.
 
 
 
- $$ G(\lambda) = \frac{\int_L I(\lambda) cos\left( 2\pi n \frac{\lambda - \lambda_i}{\lambda_{max} - \lambda_{min}} \right)}{\int_L I(\lambda)d\lambda}$$
-
-$$S(\lambda) = \frac{\int_L I(\lambda) sen\left( 2\pi n \frac{\lambda - \lambda_i}{\lambda_{max} - \lambda_{min}} \right)}{\int_L I(\lambda)d\lambda} j $$
-
-
 hsipy is a module for HSI data analysis using the phasor approach. 
 The phasor approach was developed as model free method 
 and relies on the Fourier Transform properties.
@@ -30,7 +25,10 @@ equations. I(λ) represent the intensity at every wavelength (channel), n is the
 number of the harmonic and λ i the initial wavelength. The, x and y coordinates 
 are plotted in the spectral phasor plot.
 
-![eq1](https://github.com/bschuty/PhasorPy/blob/main/Figures/equation_spectral.png)
+
+$$ G(\lambda) = \frac{\int_L I(\lambda) cos\left( 2\pi n \frac{\lambda - \lambda_i}{\lambda_{max} - \lambda_{min}} \right)}{\int_L I(\lambda)d\lambda}$$
+
+$$ S(\lambda) = \frac{\int_L I(\lambda) sen\left( 2\pi n \frac{\lambda - \lambda_i}{\lambda_{max} - \lambda_{min}} \right)}{\int_L I(\lambda)d\lambda} j $$
 
 
 The angular position in the spectral phasor plot relates to the center of mass of 
