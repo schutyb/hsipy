@@ -73,7 +73,7 @@ related to the phase and modulation.
 
 ## License
 
-[MIT](https://choosealicense.com/licenses/bsd-3-clause/)
+[bsd-3-clause](https://choosealicense.com/licenses/bsd-3-clause/)
 
 
 ## Contributing
