@@ -9,13 +9,10 @@ approach. Thus it is becoming a key player in democratizing access to HSI,
 and improve open source software for bioimaging communities.
 
 
-\begin{equation}\label{eq:G}
-    G(\lambda) = \frac{\int_L I(\lambda) cos\left( 2\pi n \frac{\lambda - \lambda_i}{\lambda_{max} - \lambda_{min}} \right)}{\int_L I(\lambda)d\lambda}
-\end{equation}
 
-\begin{equation}\label{eq:S}
-    S(\lambda) = \frac{\int_L I(\lambda) sen\left( 2\pi n \frac{\lambda - \lambda_i}{\lambda_{max} - \lambda_{min}} \right)}{\int_L I(\lambda)d\lambda} j
-\end{equation}
+ $$ G(\lambda) = \frac{\int_L I(\lambda) cos\left( 2\pi n \frac{\lambda - \lambda_i}{\lambda_{max} - \lambda_{min}} \right)}{\int_L I(\lambda)d\lambda}$$
+
+$$S(\lambda) = \frac{\int_L I(\lambda) sen\left( 2\pi n \frac{\lambda - \lambda_i}{\lambda_{max} - \lambda_{min}} \right)}{\int_L I(\lambda)d\lambda} j $$
 
 
 hsipy is a module for HSI data analysis using the phasor approach. 
