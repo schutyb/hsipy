@@ -50,9 +50,44 @@ Malacrida et al. 1.
 
 ##### Interactive1
 
-This funtion relays on matplotlib. It allows user to plot the dc image and its corresponding histogram. 
+This funtion uses matplotlib for representation. It allows user to plot the dc image and its corresponding histogram. 
 In the histogram window the user is expected to pick an intensity value which will threshold the phasor plot later. 
 Next it shows the phasor plot, where you can pick the circle componentes, and will create and display the pseudocolor image
 and the respectives spectrums to each circle. 
 
 ![fig1](https://github.com/schutyb/rep-hsipy/blob/main/figures/int1.png)
+
+
+##### Interactive2
+
+It allows to plot the dc image and the histogram where you can pick the cut off intensity to threshold the phasor 
+and later its displays the pseudoclor image created with a Hue Saturation Value color scale 
+related to the phase and modulation.
+
+![fig2](https://github.com/schutyb/rep-hsipy/blob/main/figures/int2.png)
+
+## Authors
+
+- [@schutyb](https://www.github.com/schutyb)
+
+
+## License
+
+[MIT](https://choosealicense.com/licenses/bsd-3-clause/)
+
+
+## Contributing
+
+Contributions are always very well welcome. The PhasorPy library intends 
+to create an open-source and collaborative community between spectroscopy 
+and fluorescence microscopy users with the same functionalities as SimFCS 
+but accessible and self-sustainable in the long term as other Python 
+libraries and communities. 
+
+
+## References
+
+[1] Malacrida, L., Gratton, E. & Jameson, D. M. Model-free methods to study 
+membrane environmental probes: A comparison of the spectral phasor and 
+generalized polarization approaches. Methods Appl. Fluoresc. 3, 047001 (2015).
+
