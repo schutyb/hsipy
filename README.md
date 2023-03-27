@@ -8,6 +8,7 @@ Plots are tools that help the field because of their straightforward
 approach. Thus it is becoming a key player in democratizing access to HSI, 
 and improve open source software for bioimaging communities.
 
+$$ G(\tau) = \frac{g}{t}$$
 
 hsipy is a module for HSI data analysis using the phasor approach. 
 The phasor approach was developed as model free method 
