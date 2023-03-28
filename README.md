@@ -1,4 +1,4 @@
-# hsipy: Is a Python module to perform phasor analysis and and visualize it.
+# hsipy: Is a Python module to perform phasor analysis and visualization.
 
 Hyperspectral imaging (HSI) have become paramount 
 in biomedical science. The power of the combination between traditional 
