@@ -109,6 +109,8 @@ def interactive1(dc, g, s, Ro, nbit, histeq=True, ncomp=5, filt=False, nfilt=0, 
         circle = plt.Circle((center[i][0], center[i][1]), Ro, color=ccolor[i], fill=False)
         ax3.add_patch(circle)
 
+    g = np.where(dc > ic, g, dc * np.nan)
+    s = np.where(dc > ic, s, dc * np.nan)
     rgba = hsitools.pseudocolor_image(dc, g, s, center, Ro, ncomp=ncomp)
     fig2, ax4 = plt.subplots(1, 1, figsize=(8, 8))
     ax4.imshow(rgba)
