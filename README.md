@@ -82,8 +82,8 @@ related to the phase and modulation.
 
 ## Contributing
 
-Contributions are always very well welcome. The PhasorPy library intends 
-to create an open-source and collaborative community between spectroscopy 
+Contributions are always very well welcome. This project is a fist version of PhasorPy Library 
+which intends to create an open-source and collaborative community between spectroscopy 
 and fluorescence microscopy users with the same functionalities as SimFCS 
 but accessible and self-sustainable in the long term as other Python 
 libraries and communities. 
