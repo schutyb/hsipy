@@ -1,4 +1,5 @@
 import numpy as np
+import numba as nb
 import colorsys
 
 
@@ -15,19 +16,25 @@ def phasor(image_stack, harmonic=1):
 	:return: md: is the modulus obtain with Euclidean Distance.
 	:return: ph: is the phase between g and s in degrees.
 	"""
+
+    import dask.array as da
     if image_stack.any():
-        if isinstance(harmonic, int) and 0 < harmonic < len(image_stack):
-            data = np.fft.fft(image_stack, axis=0, norm='ortho')
-            dc = data[0].real
-            dc = np.where(dc != 0, dc, int(np.mean(dc, dtype=np.float64)))  # change the zeros to the img average
-            g = data[harmonic].real
+        if isinstance(harmonic, int) and 0 < harmonic < image_stack.shape[0]:
+
+            if isinstance(image_stack, da.Array):
+                fft_slice_function = fft_slice_dask
+            else:
+                fft_slice_function = fft_slice
+            
+            dc, harmonic_slice = fft_slice_function(image_stack, slice_num=harmonic, axis=0, norm='ortho')
+            dc = np.where(dc != 0, dc, int(np.mean(dc)))
+            g, s = harmonic_slice.real, harmonic_slice.imag
             g /= dc
-            s = data[harmonic].imag
             s /= -dc
             md = np.sqrt(g ** 2 + s ** 2)
-            phaux = np.angle(data[harmonic], deg=True)
+            phaux = np.angle(harmonic_slice, deg=True)
             ph = np.where(phaux < 0, phaux + 360, phaux)
-            avg = np.mean(image_stack, axis=0, dtype=np.float64)
+            avg = np.mean(image_stack, axis=0)
             avg = avg / avg.max() * 255
         else:
             raise ValueError(
@@ -35,6 +42,63 @@ def phasor(image_stack, harmonic=1):
         return avg, g, s, md, ph
     else:
         raise ValueError("Image stack data is an empty array")
+
+
+@nb.njit
+def jit_fft(a, axis=0, norm=None):
+    """Numba fft version with rocket-fft"""
+    return np.fft.fft(a, axis=axis, norm=norm)
+
+
+def fft_slice(arr, slice_num, axis=0, norm=None, *args, **kwargs):
+    """
+    Slice of FFT over first axis of a numpy array
+    
+    Parameters
+    ----------
+    arr : numpy array
+        Array to apply FFT
+    slice_num : int
+        Slice number to return
+    axis : int, optional
+        Axis to perform FFT along, by default 0
+    norm : {None, "ortho"}, optional
+        Normalization to apply to FFT, by default None
+
+    Returns
+    -------
+    numpy arrays
+        zero-frequency part component and selected harmonic part
+    """
+    fft_arr = jit_fft(arr, axis=axis, norm=norm)
+    # Return the specified slice of the FFT array
+    return fft_arr[0, ...].real, fft_arr[slice_num, ...]
+
+
+def fft_slice_dask(arr, slice_num, axis=0, *args, **kwargs):
+    """
+    Slice of FFT over first axis of a dask array
+    
+    Parameters
+    ----------
+    arr : dask array
+        Array to apply FFT
+    slice_num : int
+        Slice number to return
+    axis : int, optional
+        Axis to perform FFT along, by default 0
+
+    Returns
+    -------
+    dask arrays
+        zero-frequency part component and selected harmonic part
+    """
+    import dask.array as da
+    # Dask fft along first axis
+    fft_arr = da.fft.fft(arr, axis=axis) # dask.array.fft.fft has no 'norm' argument yet
+    # Return the specified slice of the FFT array
+    return fft_arr[0, ...].real, fft_arr[slice_num, ...]
+
 
 
 def tilephasor(image_stack, dimx, dimy, harmonic=1):
